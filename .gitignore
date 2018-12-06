@@ -1,0 +1,15 @@
+#Jet Breans
+.idea
+cmake-build-*
+
+#CMake build
+CMakeFiles*
+CMakeCache.txt
+*.cmake
+Makefile
+
+builds
+fractal
+
+#out files
+*.pgm

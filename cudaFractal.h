@@ -10,11 +10,11 @@ static dim3 nb_threads;
 static int width;
 static int height;
 
-static float r_width;
-static float r_height;
+static double r_width;
+static double r_height;
 
-static float center_x = 0;
-static float center_y = 0;
+static double center_x = 0;
+static double center_y = 0;
 
 static int max_iter = 100;
 
@@ -26,4 +26,4 @@ void delete_gpu();
 
 void set_center(int pos_x, int pos_y);
 
-void set_zoom_scale(float scale);
+void set_zoom_scale(double scale);

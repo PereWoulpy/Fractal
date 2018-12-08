@@ -1,7 +1,6 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 #include <iostream>
-#include <math.h>
 
 #include "cudaFractal.h"
 #include "utils.h"
@@ -9,21 +8,22 @@
 #define NUM_THREADS_PER_BLOCK 256
 
 __global__ void
-drawFractal(char *out, float center_x, float center_y, float w_real, float h_real, int w_image, int h_image, int max_iter) {
+drawFractal(char *out, double center_x, double center_y, double w_real, double h_real, int w_image, int h_image,
+            int max_iter) {
     int i = threadIdx.x + blockDim.x * blockIdx.x;
 
     if (i < h_image * w_image) {
         int image_x = i % w_image;
         int image_y = i / w_image;
-        float c_x = fmaf(image_x, w_real / w_image, center_x - w_real / 2);
-        float c_y = fmaf(h_image - image_y, h_real / h_image, center_y - h_real / 2);
+        double c_x = fma((double)image_x, w_real / w_image, center_x - w_real / 2.0);
+        double c_y = fma((double)(h_image - image_y), h_real / h_image, center_y - h_real / 2.0);
 
         float iter = 0;
-        float z_x = 0;
-        float z_y = 0;
+        double z_x = 0;
+        double z_y = 0;
         while (iter < max_iter && (z_x * z_x + z_y * z_y) < 4) {
             iter++;
-            float tmp = z_x;
+            double tmp = z_x;
             z_x = z_x * z_x - z_y * z_y + c_x;
             z_y = 2 * z_y * tmp + c_y;
         }
@@ -53,8 +53,8 @@ void init_gpu(int w, int h) {
     height = h;
     width = w;
 
-    r_height = 2.5F;
-    r_width = r_height * (float) width / (float) height;
+    r_height = 2.5;
+    r_width = r_height * (double) width / (double) height;
 
     std::cout << "dimension " << r_width << " " << r_height << std::endl;
 
@@ -73,11 +73,11 @@ void delete_gpu() {
 }
 
 void set_center(int pos_x, int pos_y) {
-    center_x = ((float) pos_x / (float) width * r_width) + center_x - r_width / 2.F;
-    center_y = ((float) (height - pos_y) / (float) height * r_height) + center_y - r_height / 2.F;
+    center_x = ((double) pos_x / (double) width * r_width) + center_x - r_width / 2.0;
+    center_y = ((double) (height - pos_y) / (double) height * r_height) + center_y - r_height / 2.0;
 }
 
-void set_zoom_scale(float scale) {
+void set_zoom_scale(double scale) {
     r_width *= scale;
     r_height *= scale;
 

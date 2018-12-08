@@ -1,5 +1,5 @@
 #include <iostream>
-#include <math.h>
+#include <cmath>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -58,11 +58,11 @@ int main(int argc, char *argv[]) {
         }
 
         if (c == 'o') {
-            set_zoom_scale(1.5F);
+            set_zoom_scale(1.5);
             draw_fractal(fractal = create_fractal());
         }
         if (c == 'i') {
-            set_zoom_scale(0.66F);
+            set_zoom_scale(0.66);
             draw_fractal(fractal = create_fractal());
         }
         if (c == 's') {

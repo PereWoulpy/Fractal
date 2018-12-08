@@ -6,6 +6,14 @@
 #include "utils.h"
 
 #define NUM_THREADS_PER_BLOCK 256
+#define NUM_COLOR 3
+
+// #define SATURATION 1
+// #define VALUE 1
+
+__device__ void HSVtoRGB(int X, int h, char *rgb) {
+
+}
 
 __global__ void
 drawFractal(char *out, double center_x, double center_y, double w_real, double h_real, int w_image, int h_image,
@@ -15,8 +23,8 @@ drawFractal(char *out, double center_x, double center_y, double w_real, double h
     if (i < h_image * w_image) {
         int image_x = i % w_image;
         int image_y = i / w_image;
-        double c_x = fma((double)image_x, w_real / w_image, center_x - w_real / 2.0);
-        double c_y = fma((double)(h_image - image_y), h_real / h_image, center_y - h_real / 2.0);
+        double c_x = fma((double) image_x, w_real / w_image, center_x - w_real / 2.0);
+        double c_y = fma((double) (h_image - image_y), h_real / h_image, center_y - h_real / 2.0);
 
         float iter = 0;
         double z_x = 0;
@@ -28,7 +36,34 @@ drawFractal(char *out, double center_x, double center_y, double w_real, double h
             z_y = 2 * z_y * tmp + c_y;
         }
 
-        out[i] = (char) (iter * 255 / max_iter);
+        int h = (int) (iter * 360 / max_iter);
+        float X = 1 - abs(fmod((float) h / (float) 60, 2.F) - 1);
+
+        if (0 <= h && h < 60) {
+            out[i] = (char) 255;
+            out[i + 1] = char(X * 255);
+            out[i + 2] = 0;
+        } else if (h < 120) {
+            out[i] = char(X * 255);
+            out[i + 1] = (char) 255;
+            out[i + 2] = 0;
+        } else if (h < 180) {
+            out[i] = 0;
+            out[i + 1] = (char) 255;
+            out[i + 2] = char(X * 255);
+        } else if (h < 240) {
+            out[i] = 0;
+            out[i + 1] = char(X * 255);
+            out[i + 2] = (char) 255;
+        } else if (h < 300) {
+            out[i] = char(X * 255);
+            out[i + 1] = 0;
+            out[i + 2] = (char) 255;
+        } else if (h < 360) {
+            out[i] = (char) 255;
+            out[i + 1] = 0;
+            out[i + 2] = char(X * 255);
+        }
     }
 }
 
@@ -38,12 +73,13 @@ char *create_fractal() {
     std::cout << "max iteration : " << max_iter << std::endl;
 
     //calling the kernel !
-    drawFractal << < nb_block, nb_threads >> > (deviceImage, center_x, center_y, r_width, r_height, width, height, max_iter);
+    drawFractal << < nb_block, nb_threads >> >
+                               (deviceImage, center_x, center_y, r_width, r_height, width, height, max_iter);
 
     HANDLE_ERROR(cudaGetLastError());
     HANDLE_ERROR(cudaDeviceSynchronize());
 
-    size_t size = height * width * sizeof(char);
+    size_t size = height * width * sizeof(char) * NUM_COLOR;
     HANDLE_ERROR(cudaMemcpy(hostImage, deviceImage, size, cudaMemcpyDeviceToHost));
 
     return hostImage;
@@ -58,7 +94,7 @@ void init_gpu(int w, int h) {
 
     std::cout << "dimension " << r_width << " " << r_height << std::endl;
 
-    size_t size = height * width * sizeof(char);
+    size_t size = height * width * sizeof(char) * NUM_COLOR;
 
     hostImage = (char *) malloc(size);
     HANDLE_ERROR(cudaMalloc(&deviceImage, size));

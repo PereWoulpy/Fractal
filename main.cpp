@@ -10,33 +10,33 @@
 
 #define HEIGHT 768
 #define WIDTH  1280
-#define NUM_THREADS_PER_BLOCK 256
 
 void draw_fractal(const char *fractal) {
     for (int j = 0; j < HEIGHT; ++j) {
         for (int i = 0; i < WIDTH; ++i) {
-            char pixel = fractal[i + j * WIDTH];
-            gfx_color(pixel, pixel, pixel);
+            gfx_color(fractal[i + j * WIDTH],
+                      fractal[i + j * WIDTH + 1],
+                      fractal[i + j * WIDTH + 2]);
             gfx_point(i, j);
         }
     }
 }
 
-void save_fractal(const char* fractal) {
+void save_fractal(const char *fractal) {
     static int number = 0;
     char outputImageFile[50];
-    sprintf(outputImageFile, "mandelbrot_%d.pgm", number);
+    sprintf(outputImageFile, "mandelbrot_%d.ppm", number);
     number++;
 
     FILE *fp = fopen(outputImageFile, "wb"); /* b - binary mode */
-    fprintf(fp, "P5\n%d %d\n255\n", WIDTH, HEIGHT);
-    fwrite(fractal, sizeof(char), HEIGHT*WIDTH, fp);
+    fprintf(fp, "P6\n%d %d\n255\n", WIDTH, HEIGHT);
+    fwrite(fractal, sizeof(char), HEIGHT * WIDTH * 3, fp);
     fclose(fp);
 }
 
 int main(int argc, char *argv[]) {
     char c;
-    char* fractal;
+    char *fractal;
 
     // Open a new window for drawing.
     gfx_open(WIDTH, HEIGHT, "Example Graphics Program");

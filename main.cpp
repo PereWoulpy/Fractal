@@ -14,9 +14,10 @@
 void draw_fractal(const char *fractal) {
     for (int j = 0; j < HEIGHT; ++j) {
         for (int i = 0; i < WIDTH; ++i) {
-            gfx_color(fractal[i + j * WIDTH],
-                      fractal[i + j * WIDTH + 1],
-                      fractal[i + j * WIDTH + 2]);
+            int pixel_index = 3 * (i + j * WIDTH);
+            gfx_color(fractal[pixel_index],
+                      fractal[pixel_index + 1],
+                      fractal[pixel_index + 2]);
             gfx_point(i, j);
         }
     }

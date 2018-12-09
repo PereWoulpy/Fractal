@@ -8,12 +8,8 @@
 #define NUM_THREADS_PER_BLOCK 256
 #define NUM_COLOR 3
 
-// #define SATURATION 1
-// #define VALUE 1
-
-__device__ void HSVtoRGB(int X, int h, char *rgb) {
-
-}
+#define SATURATION 1.F
+#define VALUE 1.F
 
 __global__ void
 drawFractal(char *out, double center_x, double center_y, double w_real, double h_real, int w_image, int h_image,
@@ -36,33 +32,52 @@ drawFractal(char *out, double center_x, double center_y, double w_real, double h
             z_y = 2 * z_y * tmp + c_y;
         }
 
-        int h = (int) (iter * 360 / max_iter);
-        float X = 1 - abs(fmod((float) h / (float) 60, 2.F) - 1);
+        int h = (int) (iter * 350 / max_iter);
+        int h_ = (h / 60);
+        float chroma = SATURATION * VALUE;
+        float X = chroma * (float) (1 - abs((h_ % 2) - 1));
+        float m = VALUE - chroma;
 
-        if (0 <= h && h < 60) {
-            out[i] = (char) 255;
-            out[i + 1] = char(X * 255);
-            out[i + 2] = 0;
-        } else if (h < 120) {
-            out[i] = char(X * 255);
-            out[i + 1] = (char) 255;
-            out[i + 2] = 0;
-        } else if (h < 180) {
-            out[i] = 0;
-            out[i + 1] = (char) 255;
-            out[i + 2] = char(X * 255);
-        } else if (h < 240) {
-            out[i] = 0;
-            out[i + 1] = char(X * 255);
-            out[i + 2] = (char) 255;
-        } else if (h < 300) {
-            out[i] = char(X * 255);
-            out[i + 1] = 0;
-            out[i + 2] = (char) 255;
-        } else if (h < 360) {
-            out[i] = (char) 255;
-            out[i + 1] = 0;
-            out[i + 2] = char(X * 255);
+        int color_index = i * 3;
+
+        switch (h_) {
+            case 0:
+                out[color_index] = (char) ((chroma + m) * 255);
+                out[color_index + 1] = (char) ((X + m) * 255);
+                out[color_index + 2] = (char) (m * 255);
+                break;
+            case 1:
+                out[color_index] = (char) ((X + m) * 255);
+                out[color_index + 1] = (char) ((chroma + m) * 255);
+                out[color_index + 2] = (char) (m * 255);
+                break;
+            case 2:
+                out[color_index] = (char) (m * 255);
+                out[color_index + 1] = (char) ((chroma + m) * 255);
+                out[color_index + 2] = (char) ((X + m) * 255);
+                break;
+            case 3:
+                out[color_index] = (char) (m * 255);
+                out[color_index + 1] = (char) ((X + m) * 255);
+                out[color_index + 2] = (char) ((chroma + m) * 255);
+                break;
+            case 4:
+                out[color_index] = (char) ((X + m) * 255);
+                out[color_index + 1] = (char) (m * 255);
+                out[color_index + 2] = (char) ((chroma + m) * 255);
+                break;
+            case 5:
+                out[color_index] = (char) ((X + m) * 255);
+                out[color_index + 1] = (char) (m * 255);
+                out[color_index + 2] = (char) ((chroma + m) * 255);
+                break;
+            case 6:
+                out[color_index] = (char) ((chroma + m) * 255);
+                out[color_index + 1] = (char) (m * 255);
+                out[color_index + 2] = (char) ((X + m) * 255);
+                break;
+            default:
+                break;
         }
     }
 }

@@ -53,8 +53,11 @@ int main(int argc, char *argv[]) {
         if (c == 'q') break;
 
         if (c == 'c') {
-            std::cout << gfx_xpos() << " " << gfx_ypos() << std::endl;
             set_center(gfx_xpos(), gfx_ypos());
+            draw_fractal(fractal = create_fractal());
+        }
+        if (c == 'j') {
+            set_julia(gfx_xpos(), gfx_ypos());
             draw_fractal(fractal = create_fractal());
         }
 

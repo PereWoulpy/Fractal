@@ -13,18 +13,18 @@
 
 __global__ void
 drawFractal(char *out, double center_x, double center_y, double w_real, double h_real, int w_image, int h_image,
-            int max_iter) {
+            int max_iter, double julia_x, double julia_y) {
     int i = threadIdx.x + blockDim.x * blockIdx.x;
 
     if (i < h_image * w_image) {
         int image_x = i % w_image;
         int image_y = i / w_image;
-        double c_x = fma((double) image_x, w_real / w_image, center_x - w_real / 2.0);
-        double c_y = fma((double) (h_image - image_y), h_real / h_image, center_y - h_real / 2.0);
+        double z_x = fma((double) image_x, w_real / w_image, center_x - w_real / 2.0);
+        double z_y = fma((double) (h_image - image_y), h_real / h_image, center_y - h_real / 2.0);
 
         float iter = 0;
-        double z_x = 0;
-        double z_y = 0;
+        double c_x = julia_x;
+        double c_y = julia_y;
         while (iter < max_iter && (z_x * z_x + z_y * z_y) < 4) {
             iter++;
             double tmp = z_x;
@@ -83,7 +83,7 @@ char *create_fractal() {
 
     //calling the kernel !
     drawFractal << < nb_block, nb_threads >> >
-                               (deviceImage, center_x, center_y, r_width, r_height, width, height, max_iter);
+                               (deviceImage, center_x, center_y, r_width, r_height, width, height, max_iter, julia_x, julia_y);
 
     HANDLE_ERROR(cudaGetLastError());
     HANDLE_ERROR(cudaDeviceSynchronize());
@@ -120,6 +120,11 @@ void delete_gpu() {
 void set_center(int pos_x, int pos_y) {
     center_x = ((double) pos_x / (double) width * r_width) + center_x - r_width / 2.0;
     center_y = ((double) (height - pos_y) / (double) height * r_height) + center_y - r_height / 2.0;
+}
+
+void set_julia(int pos_x, int pos_y) {
+    julia_x = ((double) pos_x / (double) width * r_width) + center_x - r_width / 2.0;
+    julia_y = ((double) (height - pos_y) / (double) height * r_height) + center_y - r_height / 2.0;
 }
 
 void set_zoom_scale(double scale) {

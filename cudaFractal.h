@@ -16,6 +16,9 @@ static double r_height;
 static double center_x = 0;
 static double center_y = 0;
 
+static double julia_x = 0;
+static double julia_y = 0;
+
 static int max_iter = 100;
 
 char* create_fractal();
@@ -25,5 +28,7 @@ void init_gpu(int w, int h);
 void delete_gpu();
 
 void set_center(int pos_x, int pos_y);
+
+void set_julia(int pos_x, int pos_y);
 
 void set_zoom_scale(double scale);

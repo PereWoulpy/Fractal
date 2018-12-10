@@ -13,3 +13,4 @@ fractal
 
 #out files
 *.pgm
+*.ppm
